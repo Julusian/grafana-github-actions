@@ -563,7 +563,7 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-axios@^0.19.0, axios@^0.19.2:
+axios@^0.19.2:
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.2.tgz#3ea36c5d8818d0d5f8a8a97a6d36b86cdc00cb27"
   integrity sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==
@@ -682,13 +682,6 @@ ci-info@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-2.0.0.tgz#67a9e964be31a51e15e5010d58e6f12834002f46"
   integrity sha512-5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==
-
-circleci-api@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/circleci-api/-/circleci-api-4.0.0.tgz#d773fe68f4a59e1968881269883a23b0805b3546"
-  integrity sha512-D/THFyhOv6THSkYXJhrOLIOmV7fmyDqgs1+pBFMAqDR+ywXszxa2Dqx1Zw+YD3O2zD2y5LQOifCDT96VidRG7Q==
-  dependencies:
-    axios "^0.19.0"
 
 clean-stack@^2.0.0:
   version "2.2.0"

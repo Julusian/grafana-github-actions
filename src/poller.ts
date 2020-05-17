@@ -1,8 +1,5 @@
 import { Sequelize } from 'sequelize'
 import PQueue from 'p-queue'
-// import { literal } from './models'
-// import { CircleCI } from 'circleci-api'
-// import { GitlabBuild, IGitlabBuild } from './models'
 import axios from 'axios'
 import { CircleBuild, BuildState, ICircleBuild } from './models'
 
