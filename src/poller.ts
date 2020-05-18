@@ -49,7 +49,7 @@ async function pollWorkflow(
 	pipeline: any,
 	existingDoc: CircleBuild | undefined
 ): Promise<void> {
-	if (existingDoc?.finished && (existingDoc.state !== BuildState.Running || existingDoc.state)) {
+	if (existingDoc?.finished && existingDoc.state !== BuildState.Running) {
 		// Nothing to do
 		return
 	}
