@@ -58,30 +58,30 @@ async function pollWorkflow(
 	const workflow = workflowReq.data
 	// console.log(workflow)
 
-	let status = convertPipelineStatus(workflow.status)
-	let stateMessage: string | null = null
-	if (status === BuildState.Failed) {
-		status = BuildState.Failed
-		stateMessage = null
+
+	const buildSnippet: Pick<ICircleBuild, 'state' | 'stateMessage' | 'started' | 'finished'> = {
+		state: convertPipelineStatus(workflow.status),
+		stateMessage: null,
+		started: workflow.created_at ? new Date(workflow.created_at) : null, // TODO - can this be a started_at?
+		finished: workflow.stopped_at ? new Date(workflow.stopped_at) : null,
+	}
+	if (buildSnippet.state === BuildState.Failed) {
+		buildSnippet.state = BuildState.Failed
+		buildSnippet.stateMessage = null
 
 		// Compile the list of failed steps
 		const jobsReq = await axios.get(`${circleBaseUrl}workflow/${workflowId}/job`)
 		const jobs: any[] = jobsReq.data?.items || []
 		const failedSteps = jobs.filter((job): boolean => job.status === 'failed').map((job): string => job.name)
 		if (failedSteps.length) {
-			stateMessage = failedSteps.join(' \n')
+			buildSnippet.stateMessage = failedSteps.join(' \n')
 		}
 		if (failedSteps.filter((job): boolean => job.indexOf('validate-') !== 0).length === 0) {
 			// If only validate deps steps failed, then we can call that success
-			status = BuildState.Complete
+			buildSnippet.state = BuildState.Complete
 		}
-	}
-
-	const buildSnippet: Pick<ICircleBuild, 'state' | 'stateMessage' | 'started' | 'finished'> = {
-		state: status,
-		stateMessage: stateMessage,
-		started: workflow.created_at ? new Date(workflow.created_at) : null, // TODO - can this be a started_at?
-		finished: workflow.stopped_at ? new Date(workflow.stopped_at) : null,
+	} else if (buildSnippet.state === BuildState.Skipped) {
+		buildSnippet.finished = buildSnippet.started
 	}
 
 	if (existingDoc) {
