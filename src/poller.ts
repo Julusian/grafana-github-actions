@@ -76,7 +76,7 @@ async function pollWorkflow(
 		if (failedSteps.length) {
 			buildSnippet.stateMessage = failedSteps.join(' \n')
 		}
-		if (failedSteps.filter((job): boolean => job.indexOf('validate-') !== 0).length === 0) {
+		if (failedSteps.filter((job): boolean => job.indexOf('validate-all-') !== 0).length === 0) {
 			// If only validate deps steps failed, then we can call that success
 			buildSnippet.state = BuildState.Complete
 		}
