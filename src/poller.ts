@@ -58,7 +58,6 @@ async function pollWorkflow(
 	const workflow = workflowReq.data
 	// console.log(workflow)
 
-
 	const buildSnippet: Pick<ICircleBuild, 'state' | 'stateMessage' | 'started' | 'finished'> = {
 		state: convertPipelineStatus(workflow.status),
 		stateMessage: null,
@@ -91,7 +90,10 @@ async function pollWorkflow(
 			...buildSnippet,
 			project: projectName,
 			workflowId: workflowId,
-			commitRef: pipeline.vcs?.branch,
+			commitRef:
+				pipeline.vcs?.tag && pipeline.vcs?.branch
+					? `${pipeline.vcs?.branch} (${pipeline.vcs?.tag})`
+					: pipeline.vcs?.tag || pipeline.vcs?.branch,
 			commitSha: pipeline.vcs?.revision,
 			created: new Date(workflow.created_at),
 		}
