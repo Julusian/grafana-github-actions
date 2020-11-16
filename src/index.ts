@@ -1,7 +1,7 @@
 import { createTerminus, HealthCheckError, TerminusOptions } from '@godaddy/terminus'
 import { createServer } from 'http'
 import * as express from 'express'
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as reissue from 'reissue'
 
@@ -47,22 +47,28 @@ const server = createServer(app)
 
 createTerminus(server, terminusOptions)
 
-initDb().then((sequelize): void => {
-	const poller = reissue.create({
-		func: async (callback: () => void) => {
-			try {
-				// await workQueue.add(() => doPoll())
-				await doPoll(sequelize, projectsList)
-				initialScrapingFinished = true
-			} catch (e) {
-				console.error(`Poll threw error: ${JSON.stringify(e)}`)
-			}
-			return callback()
-		},
-		interval: pollInterval,
-	})
+initDb()
+	.then((sequelize): void => {
+		const poller = reissue.create({
+			func: async (callback: () => void) => {
+				try {
+					// await workQueue.add(() => doPoll())
+					await doPoll(sequelize, projectsList)
+					initialScrapingFinished = true
+				} catch (e) {
+					console.error(`Poll threw error: ${JSON.stringify(e)}`)
+				}
+				return callback()
+			},
+			interval: pollInterval,
+		})
 
-	poller.start()
-})
+		poller.start()
+	})
+	.catch((e) => {
+		console.error(`Failed to connect to the db: ${e}`)
+		// eslint-disable-next-line no-process-exit
+		process.exit(1)
+	})
 
 server.listen(port, () => console.log(`Listening at http://localhost:${port}`))
