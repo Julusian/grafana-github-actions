@@ -1,3 +1,4 @@
 .git*
-src
+dist
 *.log
+node_modules
