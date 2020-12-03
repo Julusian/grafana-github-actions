@@ -1,5 +1,5 @@
 {
-  "name": "grafana-gitlab-for-github",
+  "name": "grafana-circleci",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
