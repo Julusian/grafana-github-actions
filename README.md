@@ -2,6 +2,24 @@
 
 This projects monitors builds for specified projects in circleci, storing the status into a mysql database for consumption in grafana.
 
+## Example query
+
+```sql
+SELECT
+  REPLACE(REPLACE(project, 'github/SuperFlyTV/', 'superfly/'), 'github/nrkno/tv-automation-', 'nrkno/') as Project,
+  concat(commitRef, " (", substring(commitSha, 1, 8), ")") as Ref,
+  CONVERT(state, SIGNED) as State,
+  stateMessage as Failed,
+  TIMEDIFF(IFNULL(finished, NOW()), started) as Duration,
+  created
+FROM circleci_builds
+WHERE (created >= $__timeFrom() AND (created <= $__timeTo() OR finished <= $__timeTo() OR finished IS NULL))
+  AND (project LIKE 'github/nrkno/%' OR project LIKE 'github/SuperFlyTV/%')
+ORDER BY created DESC
+LIMIT 50
+
+```
+
 ## Installation
 
 Ensure you have a running mysql server
