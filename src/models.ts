@@ -33,22 +33,12 @@ export function BuildStateFinished(state: BuildState | undefined): boolean {
 	}
 }
 
-// export enum LoggedEventType {
-// 	BuildStart = 'build-start',
-// 	BuildSuccess = 'build-success',
-// 	BuildFailure = 'build-failure',
-// 	BuildCancelled = 'build-cancelled',
-// }
+export interface IGithubActionsBuild {
+	owner: string
+	repo: string
 
-// export interface ICircleEvent {
-// 	project: string
-// 	type: LoggedEventType
-// 	message: string
-// 	time: Date
-// }
-export interface ICircleBuild {
-	project: string
-	workflowId: string
+	workflowName: string
+	runId: number
 
 	commitSha: string
 	commitRef: string
@@ -61,15 +51,12 @@ export interface ICircleBuild {
 	finished: Date | null
 }
 
-// export class CircleEvent extends Model implements ICircleEvent {
-// 	public project!: string
-// 	public type!: LoggedEventType
-// 	public message!: string
-// 	public time!: Date
-// }
-export class CircleBuild extends Model implements ICircleBuild {
-	public project!: string
-	public workflowId!: string
+export class GithubActionsBuild extends Model implements IGithubActionsBuild {
+	public owner!: string
+	public repo!: string
+
+	public workflowName!: string
+	public runId!: number
 
 	public commitSha!: string
 	public commitRef!: string
@@ -82,56 +69,38 @@ export class CircleBuild extends Model implements ICircleBuild {
 	public finished!: Date | null
 }
 
-// CircleEvent.init(
-// 	literal<{ [field in keyof ICircleEvent]: DataType | ModelAttributeColumnOptions }>({
-// 		project: DataTypes.STRING,
-// 		type: DataTypes.STRING,
-// 		message: DataTypes.STRING,
-// 		time: DataTypes.DATE,
-// 	}),
-// 	{
-// 		sequelize,
-// 		modelName: 'circleci_event',
-// 		createdAt: false,
-// 		updatedAt: false,
-// 		deletedAt: false,
-// 		indexes: [
-// 			{
-// 				fields: ['project'],
-// 			},
-// 		],
-// 	}
-// )
-CircleBuild.init(
-	literal<{ [field in keyof ICircleBuild]: DataType | ModelAttributeColumnOptions }>({
-		project: DataTypes.STRING,
-		workflowId: DataTypes.STRING,
+GithubActionsBuild.init(
+	literal<{ [field in keyof IGithubActionsBuild]: DataType | ModelAttributeColumnOptions }>({
+		owner: DataTypes.STRING,
+		repo: DataTypes.STRING,
+		workflowName: DataTypes.STRING,
+		runId: DataTypes.INTEGER,
 		commitSha: DataTypes.STRING,
 		commitRef: DataTypes.STRING,
 		state: {
 			type: DataTypes.ENUM,
 			values: Object.values(BuildState),
 		},
-		stateMessage: DataTypes.STRING,
+		stateMessage: DataTypes.TEXT,
 		created: DataTypes.DATE,
 		started: DataTypes.DATE,
 		finished: DataTypes.DATE,
 	}),
 	{
 		sequelize,
-		modelName: 'circleci_build',
+		modelName: 'github_actions_build',
 		createdAt: false,
 		updatedAt: false,
 		deletedAt: false,
 		indexes: [
 			{
-				fields: ['project'],
+				fields: ['owner', 'repo'],
 			},
 			{
-				fields: ['workflowId'],
+				fields: ['runId'],
 			},
 			{
-				fields: ['workflowId', 'project'],
+				fields: ['runId', 'owner', 'repo'],
 				unique: true,
 			},
 		],

@@ -1,164 +1,197 @@
 import { Sequelize } from 'sequelize'
 import PQueue from 'p-queue'
-import axios from 'axios'
-import { CircleBuild, BuildState, ICircleBuild } from './models'
+import { BuildState, GithubActionsBuild, IGithubActionsBuild } from './models'
+import { Octokit, RestEndpointMethodTypes } from '@octokit/rest'
+import _ = require('underscore')
 
-const circleToken = process.env.CIRCLECI_TOKEN || ''
+const githubToken = process.env.GITHUB_TOKEN || ''
 
-if (!circleToken) {
-	throw new Error('CIRCLECI_TOKEN is required')
+if (!githubToken) {
+	throw new Error('GITHUB_TOKEN is required')
 }
 
-const circleBaseUrl = 'https://circleci.com/api/v2/'
-
-// Setup auth token
-axios.defaults.headers = {
-	'Circle-Token': circleToken,
-	Accept: 'application/json',
-}
+const octokit = new Octokit({
+	auth: githubToken,
+})
 
 export function assertUnreachableSafe(_: never): void {
 	// Nothing to do
 }
 
-export function convertPipelineStatus(status: string): BuildState {
+export function convertPipelineStatus(status: string, conclusion: string | null): BuildState {
 	switch (status) {
-		case 'cancelled':
-			return BuildState.Cancelled
-		case 'failed':
-		case 'error':
-		case 'unauthorized':
-			return BuildState.Failed
-		case 'success':
-			return BuildState.Complete
-		case 'on_hold':
+		case 'completed':
+			switch (conclusion) {
+				case 'success':
+					return BuildState.Complete
+				case 'skipped':
+				case 'neutral':
+					return BuildState.Skipped
+				case 'action_required':
+				case 'cancelled':
+				case 'timed_out':
+				case 'failure':
+				default:
+					return BuildState.Failed
+			}
+		case 'queued':
 			return BuildState.Pending
-		case 'running':
-		case 'failing':
+		case 'in_progress':
 			return BuildState.Running
-		case 'not_run':
-			return BuildState.Skipped
 		default:
 			return BuildState.Failed
 	}
 }
 
-async function pollWorkflow(
-	projectName: string,
-	workflowId: string,
-	pipeline: any,
-	existingDoc: CircleBuild | undefined
+function isFinished(state: BuildState): boolean {
+	switch (state) {
+		case BuildState.Pending:
+		case BuildState.Running:
+			return false
+		case BuildState.Cancelled:
+		case BuildState.Complete:
+		case BuildState.Failed:
+		case BuildState.Skipped:
+			return true
+		default:
+			assertUnreachableSafe(state)
+			return true
+	}
+}
+
+type ElementType<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer ElementType> ? ElementType : never
+
+type WorkFlowRun = ElementType<
+	RestEndpointMethodTypes['actions']['listWorkflowRunsForRepo']['response']['data']['workflow_runs']
+>
+
+async function pollWorkflowRun(
+	_workQueue: PQueue,
+	owner: string,
+	repo: string,
+	workflowNames: Map<number, string>,
+	run: WorkFlowRun,
+	existingDoc: GithubActionsBuild | undefined
 ): Promise<void> {
 	if (existingDoc?.finished && existingDoc.state !== BuildState.Running) {
 		// Nothing to do
 		return
 	}
 
-	const workflowReq = await axios.get(`${circleBaseUrl}workflow/${workflowId}`)
-	const workflow = workflowReq.data
-	// console.log(workflow)
+	const jobs = await octokit.actions.listJobsForWorkflowRun({
+		owner,
+		repo,
+		run_id: run.id,
+	})
 
-	const buildSnippet: Pick<ICircleBuild, 'state' | 'stateMessage' | 'started' | 'finished'> = {
-		state: convertPipelineStatus(workflow.status),
+	const jobsSimple = jobs.data.jobs.map((j) => ({
+		name: j.name,
+		started: j.started_at ? new Date(j.started_at) : null,
+		finished: j.completed_at ? new Date(j.completed_at) : null,
+		state: convertPipelineStatus(j.status, j.conclusion),
+	}))
+
+	const buildSnippet: Pick<IGithubActionsBuild, 'state' | 'stateMessage' | 'started' | 'finished'> = {
+		state: convertPipelineStatus(run.status, run.conclusion),
 		stateMessage: null,
-		started: workflow.created_at ? new Date(workflow.created_at) : null, // TODO - can this be a started_at?
-		finished: workflow.stopped_at ? new Date(workflow.stopped_at) : null,
+		started: null,
+		finished: null,
 	}
+
+	const startedTimes = _.compact(jobsSimple.map((j) => j.started))
+	const finishedTimes = _.compact(jobsSimple.map((j) => j.finished))
+	buildSnippet.started = startedTimes.length > 0 ? (_.min(startedTimes, (j) => j.getTime()) as Date) : null
+	buildSnippet.finished =
+		finishedTimes.length > 0 && isFinished(buildSnippet.state)
+			? (_.min(finishedTimes, (j) => j.getTime()) as Date)
+			: null
+
 	if (buildSnippet.state === BuildState.Failed) {
 		buildSnippet.state = BuildState.Failed
 		buildSnippet.stateMessage = null
 
 		// Compile the list of failed steps
-		const jobsReq = await axios.get(`${circleBaseUrl}workflow/${workflowId}/job`)
-		const jobs: any[] = jobsReq.data?.items || []
-		const failedSteps = jobs.filter((job): boolean => job.status === 'failed').map((job): string => job.name)
-		if (failedSteps.length) {
-			buildSnippet.stateMessage = failedSteps.join(' \n')
+		const failedJobs = jobsSimple.filter((j) => j.state === BuildState.Failed).map((j) => j.name)
+		if (failedJobs.length) {
+			buildSnippet.stateMessage = failedJobs.join(' \n')
 		}
-		if (failedSteps.filter((job): boolean => job.indexOf('validate-all-') !== 0).length === 0) {
+		if (failedJobs.filter((job): boolean => job.indexOf('validate-all-') !== 0).length === 0) {
 			// If only validate deps steps failed, then we can call that success
 			buildSnippet.state = BuildState.Complete
 		}
 	} else if (buildSnippet.state === BuildState.Skipped) {
 		buildSnippet.finished = buildSnippet.started
+	} else if (buildSnippet.state === BuildState.Running) {
+		const runningJobs = jobsSimple.filter((j) => j.state === BuildState.Running).map((j) => j.name)
+		if (runningJobs.length) {
+			buildSnippet.stateMessage = runningJobs.join(' \n')
+		}
 	}
 
 	if (existingDoc) {
 		await existingDoc.update(buildSnippet)
 	} else {
-		const build: ICircleBuild = {
+		const build: IGithubActionsBuild = {
 			...buildSnippet,
-			project: projectName,
-			workflowId: workflowId,
-			commitRef:
-				pipeline.vcs?.tag && pipeline.vcs?.branch
-					? `${pipeline.vcs?.branch} (${pipeline.vcs?.tag})`
-					: pipeline.vcs?.tag || pipeline.vcs?.branch,
-			commitSha: pipeline.vcs?.revision,
-			created: new Date(workflow.created_at),
+			owner,
+			repo,
+			workflowName: workflowNames.get(run.workflow_id) ?? '',
+			runId: run.id,
+			commitRef: run.head_branch,
+			commitSha: run.head_sha,
+			created: new Date(run.created_at),
 		}
 
-		await CircleBuild.create(build)
+		await GithubActionsBuild.create(build)
 	}
-}
-
-async function pollPipeline(
-	workQueue: PQueue,
-	projectName: string,
-	pipelineId: string,
-	pipeline: any,
-	existingDocs: CircleBuild[]
-): Promise<void> {
-	const workflows: any[] = []
-	let workflowsReq = await axios.get(`${circleBaseUrl}pipeline/${pipelineId}/workflow`)
-	workflows.push(...workflowsReq.data.items)
-	let i = 0
-	while (workflowsReq.data.next_page_token) {
-		if (i++ > 5) break // break condition
-
-		workflowsReq = await axios.get(
-			`${circleBaseUrl}pipeline/${pipelineId}/workflow?page-token=${workflowsReq.data.next_page_token}`
-		)
-		workflows.push(...workflowsReq.data.items)
-	}
-
-	workQueue.addAll(
-		workflows.map((workflow) => (): Promise<void> =>
-			pollWorkflow(
-				projectName,
-				workflow.id,
-				pipeline,
-				existingDocs.find((doc): boolean => doc.workflowId === workflow.id)
-			).catch((e) => {
-				console.error(`Failed to scrape workflow: "${projectName}":"${workflow.id}"`)
-				console.error(e)
-			})
-		)
-	)
 }
 
 async function pollProject(workQueue: PQueue, projectName: string): Promise<void> {
-	const pExistingDocs: Promise<CircleBuild[]> = CircleBuild.findAll({
+	const projectParts = projectName.split('/')
+	if (projectParts.length !== 2) {
+		throw new Error(`Bad project name: "${projectName}"`)
+	}
+	const [owner, repo] = projectParts
+
+	const pExistingDocs: Promise<GithubActionsBuild[]> = GithubActionsBuild.findAll({
 		where: {
-			project: projectName,
+			owner,
+			repo,
 		},
 		order: [['id', 'DESC']],
 		limit: 50,
 	})
 
-	// TODO - is there a limit parameter?
-	const pipelinesReq = await axios.get(`${circleBaseUrl}project/${projectName}/pipeline`)
-	const pipelines = ((pipelinesReq.data?.items as any[] | undefined) || [])
-		.filter((pipeline: any): boolean => pipeline.vcs?.branch !== 'gh-pages')
-		.slice(0, 20)
+	const [workflows, workflowRuns, existingDocs] = await Promise.all([
+		octokit.actions.listRepoWorkflows({
+			owner,
+			repo,
+		}),
+		octokit.actions.listWorkflowRunsForRepo({
+			owner,
+			repo,
+			per_page: 10,
+		}),
+		pExistingDocs,
+	])
 
-	// console.log(pipelines)
-	const existingDocs = await pExistingDocs
-	// Queue all pipelines for processing
+	const workflowNames = new Map<number, string>()
+	for (const flow of workflows.data.workflows) {
+		workflowNames.set(flow.id, flow.name)
+	}
+
+	// Queue all runs for processing
 	workQueue.addAll(
-		pipelines.map((pipeline) => (): Promise<void> =>
-			pollPipeline(workQueue, projectName, pipeline.id, pipeline, existingDocs).catch((e) => {
-				console.error(`Failed to scrape pipeline: "${projectName}":"${pipeline.id}"`)
+		workflowRuns.data.workflow_runs.map((run) => (): Promise<void> =>
+			pollWorkflowRun(
+				workQueue,
+				owner,
+				repo,
+				workflowNames,
+				run,
+				existingDocs.find((doc): boolean => doc.runId === run.id)
+			).catch((e) => {
+				console.error(`Failed to scrape run: "${projectName}":"${run.id}"`)
 				console.error(e)
 			})
 		)

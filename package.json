@@ -1,5 +1,5 @@
 {
-  "name": "grafana-circleci",
+  "name": "grafana-github-actions",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@godaddy/terminus": "^4.4.1",
-    "axios": "^0.21.0",
+    "@octokit/rest": "^18.0.12",
     "express": "^4.17.1",
     "mysql2": "^2.2.5",
     "p-queue": "^6.6.2",
