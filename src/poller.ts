@@ -103,7 +103,7 @@ async function pollWorkflowRun(
 	buildSnippet.started = startedTimes.length > 0 ? (_.min(startedTimes, (j) => j.getTime()) as Date) : null
 	buildSnippet.finished =
 		finishedTimes.length > 0 && isFinished(buildSnippet.state)
-			? (_.min(finishedTimes, (j) => j.getTime()) as Date)
+			? (_.max(finishedTimes, (j) => j.getTime()) as Date)
 			: null
 
 	if (buildSnippet.state === BuildState.Failed) {
