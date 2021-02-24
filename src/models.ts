@@ -17,20 +17,8 @@ export enum BuildState {
 	Running = 'running',
 	Complete = 'complete',
 	Failed = 'failed',
-	Cancelled = 'cancelled',
+	// Cancelled = 'cancelled',
 	Skipped = 'skipped',
-}
-
-export function BuildStateFinished(state: BuildState | undefined): boolean {
-	switch (state) {
-		case BuildState.Cancelled:
-		case BuildState.Failed:
-		case BuildState.Complete:
-		case BuildState.Skipped:
-			return true
-		default:
-			return false
-	}
 }
 
 export interface IGithubActionsBuild {

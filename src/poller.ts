@@ -18,7 +18,7 @@ export function assertUnreachableSafe(_: never): void {
 	// Nothing to do
 }
 
-export function convertPipelineStatus(status: string, conclusion: string | null): BuildState {
+function convertJobStatus(status: string, conclusion: string | null): BuildState {
 	switch (status) {
 		case 'completed':
 			switch (conclusion) {
@@ -42,13 +42,44 @@ export function convertPipelineStatus(status: string, conclusion: string | null)
 			return BuildState.Failed
 	}
 }
+function convertWorkflowStatus(
+	jobs: Array<{ state: BuildState }>,
+	status: string,
+	conclusion: string | null
+): BuildState {
+	const baseStatus = convertJobStatus(status, conclusion)
+	if (jobs.length === 0) return baseStatus
+
+	// If any failed, then fail
+	if (jobs.find((j) => j.state === BuildState.Failed)) {
+		return BuildState.Failed
+	}
+
+	// if all pending, then pending
+	if (!jobs.find((j) => j.state !== BuildState.Pending)) {
+		return BuildState.Pending
+	}
+
+	// If any pending/running, then running
+	if (jobs.find((j) => j.state === BuildState.Pending || j.state === BuildState.Running)) {
+		return BuildState.Running
+	}
+
+	// if all complete/skipped, then complete
+	if (!jobs.find((j) => j.state !== BuildState.Complete && j.state !== BuildState.Skipped)) {
+		return BuildState.Complete
+	}
+
+	// fallback that should never be hit
+	return baseStatus
+}
 
 function isFinished(state: BuildState): boolean {
 	switch (state) {
 		case BuildState.Pending:
 		case BuildState.Running:
 			return false
-		case BuildState.Cancelled:
+		// case BuildState.Cancelled:
 		case BuildState.Complete:
 		case BuildState.Failed:
 		case BuildState.Skipped:
@@ -88,11 +119,11 @@ async function pollWorkflowRun(
 		name: j.name,
 		started: j.started_at ? new Date(j.started_at) : null,
 		finished: j.completed_at ? new Date(j.completed_at) : null,
-		state: convertPipelineStatus(j.status, j.conclusion),
+		state: convertJobStatus(j.status, j.conclusion),
 	}))
 
 	const buildSnippet: Pick<IGithubActionsBuild, 'state' | 'stateMessage' | 'started' | 'finished'> = {
-		state: convertPipelineStatus(run.status, run.conclusion),
+		state: convertWorkflowStatus(jobsSimple, run.status, run.conclusion),
 		stateMessage: null,
 		started: null,
 		finished: null,
