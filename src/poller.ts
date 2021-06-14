@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import PQueue from 'p-queue'
 import { BuildState, GithubActionsBuild, IGithubActionsBuild } from './models'
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest'
-import _ = require('underscore')
+import * as _ from 'underscore'
 
 const githubToken = process.env.GITHUB_TOKEN || ''
 
