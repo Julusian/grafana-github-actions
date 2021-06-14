@@ -217,18 +217,19 @@ async function pollProject(workQueue: PQueue, projectName: string): Promise<void
 
 	// Queue all runs for processing
 	workQueue.addAll(
-		workflowRuns.data.workflow_runs.map((run) => (): Promise<void> =>
-			pollWorkflowRun(
-				workQueue,
-				owner,
-				repo,
-				workflowNames,
-				run,
-				existingDocs.find((doc): boolean => doc.runId === run.id)
-			).catch((e) => {
-				console.error(`Failed to scrape run: "${projectName}":"${run.id}"`)
-				console.error(e)
-			})
+		workflowRuns.data.workflow_runs.map(
+			(run) => (): Promise<void> =>
+				pollWorkflowRun(
+					workQueue,
+					owner,
+					repo,
+					workflowNames,
+					run,
+					existingDocs.find((doc): boolean => doc.runId === run.id)
+				).catch((e) => {
+					console.error(`Failed to scrape run: "${projectName}":"${run.id}"`)
+					console.error(e)
+				})
 		)
 	)
 }
