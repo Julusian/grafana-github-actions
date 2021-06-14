@@ -216,7 +216,7 @@ async function pollProject(workQueue: PQueue, projectName: string): Promise<void
 	}
 
 	// Queue all runs for processing
-	workQueue.addAll(
+	void workQueue.addAll(
 		workflowRuns.data.workflow_runs.map(
 			(run) => (): Promise<void> =>
 				pollWorkflowRun(
@@ -243,7 +243,7 @@ export async function doPoll(_sequelize: Sequelize, projectList: string[]): Prom
 		timeout: 4000,
 	})
 
-	workQueue.addAll(
+	await workQueue.addAll(
 		projectList.map((projectName): (() => Promise<void>) => (): Promise<void> => {
 			return pollProject(workQueue, projectName).catch((e) => {
 				console.error(`Failed to scrape project: "${projectName}"`)
@@ -252,6 +252,5 @@ export async function doPoll(_sequelize: Sequelize, projectList: string[]): Prom
 		})
 	)
 
-	await workQueue.onIdle()
 	console.log('Completed poll')
 }
