@@ -50,11 +50,6 @@ function convertWorkflowStatus(
 	const baseStatus = convertJobStatus(status, conclusion)
 	if (jobs.length === 0) return baseStatus
 
-	// If any failed, then fail
-	if (jobs.find((j) => j.state === BuildState.Failed)) {
-		return BuildState.Failed
-	}
-
 	// if all pending, then pending
 	if (!jobs.find((j) => j.state !== BuildState.Pending)) {
 		return BuildState.Pending
@@ -63,6 +58,11 @@ function convertWorkflowStatus(
 	// If any pending/running, then running
 	if (jobs.find((j) => j.state === BuildState.Pending || j.state === BuildState.Running)) {
 		return BuildState.Running
+	}
+
+	// If any failed, then fail
+	if (jobs.find((j) => j.state === BuildState.Failed)) {
+		return BuildState.Failed
 	}
 
 	// if all complete/skipped, then complete
@@ -146,7 +146,11 @@ async function pollWorkflowRun(
 		if (failedJobs.length) {
 			buildSnippet.stateMessage = failedJobs.join(' \n')
 		}
-		if (failedJobs.filter((job): boolean => job.indexOf('validate-all-') !== 0).length === 0) {
+		if (
+			failedJobs.filter(
+				(job): boolean => job.indexOf('validate-all-') !== 0 && job.indexOf('Validate all ') !== 0
+			).length === 0
+		) {
 			// If only validate deps steps failed, then we can call that success
 			buildSnippet.state = BuildState.Complete
 		}
