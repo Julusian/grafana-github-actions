@@ -1,11 +1,12 @@
-FROM node:14
+FROM node:18
 COPY . /build
 WORKDIR /build
 RUN yarn install && yarn build
+RUN yarn workspaces focus --all --production
 
-FROM node:14-slim
+FROM node:18-alpine
 COPY --from=0 /build/package.json /build/package.json
 COPY --from=0 /build/dist /build/dist
+COPY --from=0 /build/node_modules /build/node_modules
 WORKDIR /build
-RUN yarn install --production
 CMD ["node", "dist/index.js"]
