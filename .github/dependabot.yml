@@ -5,10 +5,10 @@
 
 version: 2
 updates:
-  - package-ecosystem: nom
-    directory: "/"
+  - package-ecosystem: npm
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
   - package-ecosystem: github-actions
     directory: /
     schedule:
