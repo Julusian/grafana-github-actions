@@ -1,12 +1,12 @@
 import { createTerminus, HealthCheckError, TerminusOptions } from '@godaddy/terminus'
 import { createServer } from 'http'
-import * as express from 'express'
+import express from 'express'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as reissue from 'reissue'
 
-import { initDb } from './models'
-import { doPoll } from './poller'
+import { initDb } from './models.js'
+import { doPoll } from './poller.js'
 
 let initialScrapingFinished = false
 async function healthCheck(): Promise<any> {
@@ -18,6 +18,8 @@ async function healthCheck(): Promise<any> {
 
 async function onSignal(): Promise<any> {
 	console.log('caught signal. Starting cleanup')
+
+	if (poller) poller.stop()
 }
 
 async function onShutdown(): Promise<any> {
@@ -47,9 +49,11 @@ const server = createServer(app)
 
 createTerminus(server, terminusOptions)
 
+let poller: any
+
 initDb()
 	.then((sequelize): void => {
-		const poller = reissue.create({
+		poller = reissue.create({
 			func: async (callback: () => void) => {
 				try {
 					// await workQueue.add(() => doPoll())

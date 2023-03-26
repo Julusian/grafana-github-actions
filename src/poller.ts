@@ -1,8 +1,8 @@
 import { Sequelize } from 'sequelize'
 import PQueue from 'p-queue'
-import { BuildState, GithubActionsBuild, IGithubActionsBuild } from './models'
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest'
 import * as _ from 'underscore'
+import { BuildState, GithubActionsBuild, IGithubActionsBuild } from './models.js'
 
 const githubToken = process.env.GITHUB_TOKEN || ''
 
@@ -123,7 +123,7 @@ async function pollWorkflowRun(
 	}))
 
 	const buildSnippet: Pick<IGithubActionsBuild, 'state' | 'stateMessage' | 'started' | 'finished'> = {
-		state: convertWorkflowStatus(jobsSimple, run.status, run.conclusion),
+		state: convertWorkflowStatus(jobsSimple, run.status ?? 'unknown', run.conclusion),
 		stateMessage: null,
 		started: null,
 		finished: null,
@@ -172,7 +172,7 @@ async function pollWorkflowRun(
 			repo,
 			workflowName: workflowNames.get(run.workflow_id) ?? '',
 			runId: run.id,
-			commitRef: run.head_branch,
+			commitRef: run.head_branch ?? '',
 			commitSha: run.head_sha,
 			created: new Date(run.created_at),
 		}
@@ -218,7 +218,7 @@ async function pollProject(workQueue: PQueue, projectName: string): Promise<void
 	// Queue all runs for processing
 	void workQueue.addAll(
 		workflowRuns.data.workflow_runs.map(
-			(run) => (): Promise<void> =>
+			(run) => async (): Promise<void> =>
 				pollWorkflowRun(
 					workQueue,
 					owner,
@@ -244,7 +244,7 @@ export async function doPoll(_sequelize: Sequelize, projectList: string[]): Prom
 	})
 
 	await workQueue.addAll(
-		projectList.map((projectName): (() => Promise<void>) => (): Promise<void> => {
+		projectList.map((projectName) => async (): Promise<void> => {
 			return pollProject(workQueue, projectName).catch((e) => {
 				console.error(`Failed to scrape project: "${projectName}"`)
 				console.error(e)

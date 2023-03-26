@@ -1,7 +1,9 @@
 FROM node:18
 COPY . /build
 WORKDIR /build
-RUN yarn install && yarn build
+RUN yarn install
+RUN yarn build
+RUN yarn postinstall:disable
 RUN yarn workspaces focus --all --production
 
 FROM node:18-alpine

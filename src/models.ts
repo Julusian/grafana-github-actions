@@ -39,7 +39,7 @@ export interface IGithubActionsBuild {
 	finished: Date | null
 }
 
-export class GithubActionsBuild extends Model implements IGithubActionsBuild {
+export class GithubActionsBuild extends Model<IGithubActionsBuild> implements IGithubActionsBuild {
 	public owner!: string
 	public repo!: string
 
@@ -67,7 +67,7 @@ GithubActionsBuild.init(
 		commitRef: DataTypes.STRING,
 		state: {
 			type: DataTypes.ENUM,
-			values: Object.values(BuildState),
+			values: Object.values<BuildState>(BuildState),
 		},
 		stateMessage: DataTypes.TEXT,
 		created: DataTypes.DATE,

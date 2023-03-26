@@ -36,7 +36,7 @@ docker run --restart=always \
   -e MYSQL_URL="mysql://USERNAME:PASSWORD@HOST/DATABASE" \
   -e PROJECTS=julusian/node-elgato-stream-deck,bitfocus/companion \
   -e GITHUB_TOKEN=______ \
-   julusian/grafana-github-actions
+   ghcr.io/julusian/grafana-github-actions
 
 ```
 
