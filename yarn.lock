@@ -299,9 +299,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sofie-automation/code-standard-preset@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "@sofie-automation/code-standard-preset@npm:2.4.0"
+"@sofie-automation/code-standard-preset@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "@sofie-automation/code-standard-preset@npm:2.4.1"
   dependencies:
     "@sofie-automation/eslint-plugin": ^0.1.1
     "@typescript-eslint/eslint-plugin": ^5.54.1
@@ -326,7 +326,7 @@ __metadata:
   bin:
     sofie-licensecheck: bin/checkLicenses.mjs
     sofie-version: bin/updateVersion.mjs
-  checksum: 7f7006591d9498cb897270c596acb3ac38f34b8c385399c0d137cd29cdc7faacd1765900299171244c561359a6f04abb6518447071bf8abd0bae682de9d7e1ad
+  checksum: 4f2ccb2eb1db3e833066c33f57a824149b9148f979dc85b0be95ff58055d2013cb71a3fb49d19316efc8028bf8cf5263d1d5c2fbe503fd786f96fe4d9c9f617d
   languageName: node
   linkType: hard
 
@@ -1821,7 +1821,7 @@ __metadata:
   dependencies:
     "@godaddy/terminus": ^4.11.2
     "@octokit/rest": ^19.0.7
-    "@sofie-automation/code-standard-preset": ^2.4.0
+    "@sofie-automation/code-standard-preset": ^2.4.1
     "@types/express": ^4.17.17
     "@types/node": ^18.15.10
     "@types/underscore": ^1.11.4
