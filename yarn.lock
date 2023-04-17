@@ -83,12 +83,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@godaddy/terminus@npm:^4.11.2":
-  version: 4.11.2
-  resolution: "@godaddy/terminus@npm:4.11.2"
+"@godaddy/terminus@npm:^4.12.0":
+  version: 4.12.0
+  resolution: "@godaddy/terminus@npm:4.12.0"
   dependencies:
     stoppable: ^1.1.0
-  checksum: 29ba5a7db8a807d785103dbf1778ddf881867c1be93e1cf2c87dd9cf82bb330ca9c5e83f91db4107e7051aca335335c74e125e698791ce0c41105f8b33752eae
+  checksum: 91f5d50b5e5a331386b9b3223e703afe13d2c9f11497a6f9227769b9d1aa7ace7d5a5926b6e723f7e2768629ec58e518424c758b1e3b56a353f53833100f9ed4
   languageName: node
   linkType: hard
 
@@ -1819,7 +1819,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "grafana-github-actions@workspace:."
   dependencies:
-    "@godaddy/terminus": ^4.11.2
+    "@godaddy/terminus": ^4.12.0
     "@octokit/rest": ^19.0.7
     "@sofie-automation/code-standard-preset": ^2.4.1
     "@types/express": ^4.17.17
