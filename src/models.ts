@@ -62,7 +62,7 @@ GithubActionsBuild.init(
 		owner: DataTypes.STRING,
 		repo: DataTypes.STRING,
 		workflowName: DataTypes.STRING,
-		runId: DataTypes.INTEGER,
+		runId: DataTypes.BIGINT,
 		commitSha: DataTypes.STRING,
 		commitRef: DataTypes.STRING,
 		state: {
