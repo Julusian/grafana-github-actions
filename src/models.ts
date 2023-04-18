@@ -1,12 +1,46 @@
 import { Sequelize, Model, DataTypes, DataType, ModelAttributeColumnOptions } from 'sequelize'
+import { readFileSync } from 'node:fs'
 
-const mysqlUrl = process.env.MYSQL_URL || ''
-
-if (!mysqlUrl || mysqlUrl.length === 0) {
-	throw new Error('MYSQL_URL is required')
+const mysqlHost = process.env.MYSQL_HOST || ''
+if (!mysqlHost || mysqlHost.length === 0) {
+	throw new Error('MYSQL_HOST is required')
 }
 
-const sequelize = new Sequelize(mysqlUrl)
+const mysqlDatabase = process.env.MYSQL_DATABASE || ''
+if (!mysqlDatabase || mysqlDatabase.length === 0) {
+	throw new Error('MYSQL_DATABASE is required')
+}
+
+const mysqlUser = process.env.MYSQL_USER || ''
+if (!mysqlUser || mysqlUser.length === 0) {
+	throw new Error('MYSQL_USER is required')
+}
+
+const mysqlPassword = process.env.MYSQL_PASSWORD || ''
+if (!mysqlPassword || mysqlUser.length === 0) {
+	throw new Error('MYSQL_PASSWORD is required')
+}
+
+const mysqlCertPath = process.env.MYSQL_CA_PATH || ''
+if (!mysqlCertPath || mysqlCertPath.length === 0) {
+	throw new Error('MYSQL_CA_PATH is required')
+}
+
+const mysqlCert = [readFileSync(mysqlCertPath, 'utf8')] || ''
+if (!mysqlCert || mysqlCert.length === 0) {
+	throw new Error('Cert can not be empty')
+}
+
+const sequelize = new Sequelize(mysqlDatabase, mysqlUser, mysqlPassword, {
+	host: mysqlHost,
+	dialect: 'mysql',
+	dialectOptions: {
+		ssl: {
+			ca: mysqlCert,
+			rejectUnauthorized: false,
+		},
+	},
+})
 
 export function literal<T>(v: T): T {
 	return v
