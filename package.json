@@ -29,7 +29,7 @@
   "devDependencies": {
     "@sofie-automation/code-standard-preset": "^2.4.1",
     "@types/express": "^4.17.17",
-    "@types/node": "^18.15.11",
+    "@types/node": "^18.16.0",
     "@types/underscore": "^1.11.4",
     "husky": "^8.0.3",
     "pinst": "^3.0.0",
