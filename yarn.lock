@@ -315,9 +315,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sofie-automation/code-standard-preset@npm:^2.4.6":
-  version: 2.4.6
-  resolution: "@sofie-automation/code-standard-preset@npm:2.4.6"
+"@sofie-automation/code-standard-preset@npm:^2.4.7":
+  version: 2.4.7
+  resolution: "@sofie-automation/code-standard-preset@npm:2.4.7"
   dependencies:
     "@sofie-automation/eslint-plugin": ^0.1.1
     "@typescript-eslint/eslint-plugin": ^5.59.1
@@ -342,7 +342,7 @@ __metadata:
   bin:
     sofie-licensecheck: ./bin/checkLicenses.mjs
     sofie-version: ./bin/updateVersion.mjs
-  checksum: 3fe36dd192d4b3a774988c3fe60bd8f2c1130a07d77c335ae1abf731e9584bb8a8741d18f38ed58b9a5f90998570f3fccc048e32b7f77da7afd22a5e09adc337
+  checksum: 399ec1db25a07da1b19533403fb86ad67f930bf3196df71562b41800636a1f0008038bf7ae4c720f9ec478e5330d31d335d0690e1e2a281fd9c33a66e25ed740
   languageName: node
   linkType: hard
 
@@ -1914,13 +1914,13 @@ __metadata:
   dependencies:
     "@godaddy/terminus": ^4.12.0
     "@octokit/rest": ^19.0.8
-    "@sofie-automation/code-standard-preset": ^2.4.6
+    "@sofie-automation/code-standard-preset": ^2.4.7
     "@types/express": ^4.17.17
     "@types/node": ^18.16.3
     "@types/underscore": ^1.11.4
     express: ^4.18.2
     husky: ^8.0.3
-    mysql2: ^3.3.0
+    mysql2: ^3.3.1
     p-queue: ^7.3.4
     pinst: ^3.0.0
     reissue: ^3.1.0
@@ -2664,9 +2664,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mysql2@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "mysql2@npm:3.3.0"
+"mysql2@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "mysql2@npm:3.3.1"
   dependencies:
     denque: ^2.1.0
     generate-function: ^2.3.1
@@ -2676,7 +2676,7 @@ __metadata:
     named-placeholders: ^1.1.3
     seq-queue: ^0.0.5
     sqlstring: ^2.3.2
-  checksum: a3418ab9371d5d329438eb91ecbac45f32fa8cc1b2d64773dd79a2989ad73979826492e44ac948008030177c5aba2b18b990553bd7c4f279dcbadfd345424a4f
+  checksum: b4b614cc9fab5cb550e06aa56de5d5184fe041f934b274da4aae035f3376d9b7fe17ba5e4bd28420679c67f118794f848c8536dd37ecc8749f16d064e96bc1a0
   languageName: node
   linkType: hard
 
