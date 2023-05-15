@@ -27,7 +27,7 @@
     "lint-staged": "./node_modules/.bin/lint-staged"
   },
   "devDependencies": {
-    "@sofie-automation/code-standard-preset": "^2.4.6",
+    "@sofie-automation/code-standard-preset": "^2.4.7",
     "@types/express": "^4.17.17",
     "@types/node": "^18.16.3",
     "@types/underscore": "^1.11.4",
