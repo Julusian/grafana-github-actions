@@ -30,7 +30,7 @@
     "@sofie-automation/code-standard-preset": "^2.4.7",
     "@types/express": "^4.17.17",
     "@types/node": "^18.16.14",
-    "@types/underscore": "^1.11.4",
+    "@types/underscore": "^1.11.5",
     "husky": "^8.0.3",
     "pinst": "^3.0.0",
     "rimraf": "^5.0.1",
