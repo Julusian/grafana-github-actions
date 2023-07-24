@@ -544,10 +544,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/underscore@npm:^1.11.4":
-  version: 1.11.4
-  resolution: "@types/underscore@npm:1.11.4"
-  checksum: db9f8486bc851b732259e51f42d62aad1ae2158be5724612dc125ece5f5d61c51447f9dea28284c2a0f79cb95e788d01cb5ce97709880019213e69fab0dd1696
+"@types/underscore@npm:^1.11.6":
+  version: 1.11.6
+  resolution: "@types/underscore@npm:1.11.6"
+  checksum: 89b92c35d1b464c9fcddc2683ea41ad1aaa0b298e7243e5ae808ea3dfd545062ca83b0d63515f89578f84cb479de877dbb61f1bb2fcc2a7e5755812f42b09b8b
   languageName: node
   linkType: hard
 
@@ -1959,7 +1959,7 @@ __metadata:
     "@sofie-automation/code-standard-preset": ^2.4.7
     "@types/express": ^4.17.17
     "@types/node": ^18.17.0
-    "@types/underscore": ^1.11.4
+    "@types/underscore": ^1.11.6
     express: ^4.18.2
     husky: ^8.0.3
     mysql2: ^3.5.2
