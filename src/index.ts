@@ -1,6 +1,5 @@
 import { createTerminus, HealthCheckError, TerminusOptions } from '@godaddy/terminus'
 import { createServer } from 'http'
-import express from 'express'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as reissue from 'reissue'
@@ -44,8 +43,9 @@ if (projectsList.length === 0) {
 	throw new Error('Some packages must be specified')
 }
 
-const app = express()
-const server = createServer(app)
+const server = createServer((_request, response) => {
+	response.end(`Not found`)
+})
 
 createTerminus(server, terminusOptions)
 
