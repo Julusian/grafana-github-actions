@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit guidelines.
 
+## [1.4.0](https://github.com/julusian/grafana-github-actions/compare/v1.3.1...v1.4.0) (Wed Jul 02 2025)
+
+### Fixes
+
+- update tooling [69905e8](https://github.com/julusian/grafana-github-actions/commit/69905e8cf65c66149989a3651382f4f6e25623f3)
+
+### Features
+
+- update node and remove express [8fbd440](https://github.com/julusian/grafana-github-actions/commit/8fbd440e2115c5e99b827ac1477490ded1e7d6bb)
+
 ## [1.3.1](https://github.com/julusian/grafana-github-actions/compare/v1.3.0...v1.3.1) (Mon Mar 04 2024)
 
 ### Fixes
