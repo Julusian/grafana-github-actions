@@ -71,7 +71,7 @@ initDb()
 	})
 	.catch((e) => {
 		console.error(`Failed to connect to the db: ${e}`)
-		// eslint-disable-next-line no-process-exit
+		// eslint-disable-next-line n/no-process-exit
 		process.exit(1)
 	})
 
